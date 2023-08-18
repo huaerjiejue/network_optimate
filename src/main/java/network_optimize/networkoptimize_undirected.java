@@ -3,7 +3,6 @@ package network_optimize;
 import org.jetbrains.annotations.NotNull;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.*;
@@ -14,13 +13,13 @@ import java.util.Scanner;
 
 public class networkoptimize_undirected<T> implements network_optimize<T> {
 
-    private DirectedGraph<T, DefaultEdge> graph;
-    private Map<T, Double> Loads;
-    private float alpha;
+    public DirectedGraph<T, DefaultEdge> graph;
+    public Map<T, Double> Loads;
+    public Double alpha;
 
     public networkoptimize_undirected() {
         this.graph = new DefaultDirectedGraph<>(DefaultEdge.class);
-        this.alpha = 1;
+        this.alpha = 1.0;
         this.Loads = new java.util.HashMap<>();
     }
 
@@ -51,7 +50,7 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
         this.Loads.putAll(Loads);
     }
 
-    public int compute_cost(@NotNull List<T> path) {
+    public double compute_cost(@NotNull List<T> path) {
         int cost = 0;
         int length = path.size();
         cost += (length - 1);
@@ -63,7 +62,7 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
 
 
     @Override
-    public void setAlpha(float alpha) {
+    public void setAlpha(double alpha) {
         this.alpha = alpha;
     }
 
@@ -132,22 +131,26 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
         return path;
     }
 
+    public int get_num_of_graph() {
+        return graph.vertexSet().size();
+    }
+
 
     @Override
     public void optimize(@NotNull DirectedGraph<T, DefaultEdge> graph, Map<T, Double> Loads) {
-        int num = graph.vertexSet().size();
+        int num = get_num_of_graph();
         for (int i = 0; i < num; i++) {
             for (int j = i + 1; j < num; j++) {
                 T source = (T) graph.vertexSet().toArray()[i];
                 T destination = (T) graph.vertexSet().toArray()[j];
                 // 找到所有最短路径
                 List<GraphPath<T, DefaultEdge>> paths = get_all_shortest_paths(source, destination);
-                List<Integer> costs = new java.util.ArrayList<>();
+                List<Double> costs = new java.util.ArrayList<>();
                 // 找到cost最小的路径
                 for (GraphPath<T, DefaultEdge> path : paths) {
                     costs.add(compute_cost(path.getVertexList()));
                 }
-                int min_cost = java.util.Collections.min(costs);
+                Double min_cost = java.util.Collections.min(costs);
                 int index = costs.indexOf(min_cost);
                 // 更新Loads
                 update_loads(paths.get(index).getVertexList(), 1);
@@ -160,6 +163,7 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
     }
 
 
+    @Override
     public void optimize_shunt(@NotNull DirectedGraph<T, DefaultEdge> graph, Map<T, Double> Loads) {
         int num = graph.vertexSet().size();
         for (int i = 0; i < num; i++) {
