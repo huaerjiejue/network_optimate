@@ -182,13 +182,13 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
                         paths.add(path);
                     }
                 }
-                List<Integer> costs = new java.util.ArrayList<>();
+                List<Double> costs = new java.util.ArrayList<>();
                 int sum = 0;
                 for (GraphPath<T, DefaultEdge> path : paths) {
                     costs.add(compute_cost(path.getVertexList()));
                     sum += compute_cost(path.getVertexList());
                 }
-                // 每个节点都要有流量经过，负载越大，流量越小
+                // 每个节点都要有流量经过，负载越大，流量越小,总和为1
                 int size = paths.size();
                 for (int k = 0; k < size; k++) {
 //                    System.out.println(paths.get(k).getVertexList());
@@ -202,18 +202,6 @@ public class networkoptimize_undirected<T> implements network_optimize<T> {
 
             }
         }
-
-    }
-
-    public static void main(String[] args) {
-        networkoptimize_undirected<String> optimizer = new networkoptimize_undirected<String>();
-        optimizer.fill_graph();
-        optimizer.init_loads(true);
-        optimizer.show_graph();
-        optimizer.show_loads();
-//        optimizer.optimize(optimizer.graph, optimizer.Loads);
-        optimizer.optimize_shunt(optimizer.graph, optimizer.Loads);
-
 
     }
 

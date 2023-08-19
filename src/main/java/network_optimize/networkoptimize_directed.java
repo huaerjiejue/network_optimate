@@ -137,4 +137,56 @@ public class networkoptimize_directed<T> extends networkoptimize_undirected<T> i
             }
         }
     }
+
+
+    @Override
+    public void optimize_shunt(DirectedGraph<T, DefaultEdge> graph, Map<T, Double> Loads) {
+        int num = super.get_num_of_graph();
+        if (num == 0) {
+            throw new NullPointerException("graph is null");
+        }
+        for (int i = 0; i < num; i++) {
+            for (int j = 0; j < num; j++) {
+                if (i == j) {
+                    continue;
+                }
+                T source = (T) graph.vertexSet().toArray()[i];
+                T target = (T) graph.vertexSet().toArray()[j];
+                // 从i到j的流量
+                Map<T, T> temp = new java.util.HashMap<>();
+                temp.put(source, target);
+                double flow = Flows.get(temp);
+                // 从i到j的所有最短路径
+                List<GraphPath<T, DefaultEdge>> paths_all = super.get_all_shortest_paths(source, target);
+                // 最短路径
+                GraphPath<T, DefaultEdge> shortest_path;
+                shortest_path = super.get_shortest_path(source, target);
+                int len = shortest_path.getVertexList().size();
+                List<GraphPath<T, DefaultEdge>> paths = new java.util.ArrayList<>();
+                // 找到所有长度为len的路径
+                for (GraphPath<T, DefaultEdge> path : paths_all) {
+                    if (path.getLength() == len) {
+                        paths.add(path);
+                    }
+                }
+                List<Double> costs = new ArrayList<>();
+                double sum = 0;
+                for (GraphPath<T, DefaultEdge> path : paths) {
+                    double cost = compute_cost(path.getVertexList());
+                    costs.add(cost);
+                    sum += cost;
+                }
+                // 每个节点都要有流量经过，负载越大，流量越小,总和是flow
+                int size = paths.size();
+                for (int k = 0; k < size; k++) {
+                    double weight = (sum - costs.get(k)) / (size * (size - 1));
+                    weight = weight * flow;
+                    super.update_loads(paths.get(k).getVertexList(), weight);
+                }
+                System.out.println("Loads is :" + Loads);
+
+
+            }
+        }
+    }
 }
